@@ -13,17 +13,37 @@ class FootballDataAPI:
         response = requests.get(url, headers=self.headers, params=params, timeout=10)
         response.raise_for_status()
         return response.json()
+    
+    def get_team_past_results(self, team_id, n=10):
+        url = f"{self.base_url}/teams/{team_id}/matches"
+        params = {'status': 'FINISHED', 'limit': n}
+        response = requests.get(url, headers=self.headers, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
 
 class PatternAnalyzer:
     @staticmethod
-    def find_draw_patterns(matches_data):
-        patterns = {'0-0': [], '1-1': [], '2-2': [], '3-3': []}
+    def estimate_draw_probability(matches_data, api_client):
+        probabilities = []
         for match in matches_data.get('matches', []):
-            score = match.get('score', {}).get('fullTime', {})
-            home = score.get('home')
-            away = score.get('away')
-            if home is not None and away is not None and home == away:
-                pattern_key = f"{home}-{away}"
-                if pattern_key in patterns:
-                    patterns[pattern_key].append(match)
-        return patterns
+            home_id = match['homeTeam']['id']
+            away_id = match['awayTeam']['id']
+            home_results = api_client.get_team_past_results(home_id, n=10)
+            away_results = api_client.get_team_past_results(away_id, n=10)
+            # calcola % di 1-1 (o X) per entrambe
+            def calc_draw_percent(results):
+                draws = 0
+                total = 0
+                for m in results.get('matches', []):
+                    score = m.get('score', {}).get('fullTime', {})
+                    home = score.get('home')
+                    away = score.get('away')
+                    if home is not None and away is not None and home == away:
+                        draws += 1
+                    total += 1
+                return draws/total if total else 0
+            home_draw = calc_draw_percent(home_results)
+            away_draw = calc_draw_percent(away_results)
+            prob = round(((home_draw + away_draw) / 2) * 100, 1)
+            probabilities.append({'match': match, 'draw_probability': prob})
+        return probabilities
