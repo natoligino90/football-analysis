@@ -18,8 +18,8 @@ def get_palinsesto():
     competition = request.args.get('competition', 'SA')
     days = int(request.args.get('days', 7))
     try:
-        data = api_client.get_upcoming_matches(competition, days)
-        return jsonify({'success': True, 'data': data})
+        matches_data = api_client.get_upcoming_matches(competition, days, limit=8)
+        return jsonify({'success': True, 'data': matches_data})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -28,7 +28,7 @@ def probabilita_pareggio():
     competition = request.args.get('competition', 'SA')
     days = int(request.args.get('days', 7))
     try:
-        matches_data = api_client.get_upcoming_matches(competition, days)
+        matches_data = api_client.get_upcoming_matches(competition, days, limit=8)
         prob_list = analyzer.estimate_draw_probability(matches_data, api_client)
         out = []
         for item in prob_list:
