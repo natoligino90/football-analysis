@@ -13,3 +13,17 @@ class FootballDataAPI:
         response = requests.get(url, headers=self.headers, params=params, timeout=10)
         response.raise_for_status()
         return response.json()
+
+class PatternAnalyzer:
+    @staticmethod
+    def find_draw_patterns(matches_data):
+        patterns = {'0-0': [], '1-1': [], '2-2': [], '3-3': []}
+        for match in matches_data.get('matches', []):
+            score = match.get('score', {}).get('fullTime', {})
+            home = score.get('home')
+            away = score.get('away')
+            if home is not None and away is not None and home == away:
+                pattern_key = f"{home}-{away}"
+                if pattern_key in patterns:
+                    patterns[pattern_key].append(match)
+        return patterns
