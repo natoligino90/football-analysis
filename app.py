@@ -1,29 +1,29 @@
-import requests
-from datetime import datetime, timedelta
+from flask import Flask, jsonify, render_template, request
+from football_api import FootballDataAPI, PatternAnalyzer
+import os
+from datetime import datetime
 
-class FootballDataAPI:
-    def __init__(self, api_key):
-        self.base_url = "https://api.football-data.org/v4"
-        self.headers = {'X-Auth-Token': api_key}
+app = Flask(__name__)
+
+API_KEY = '9459832e421b4e4e93730bdf969514ff'
+api_client = FootballDataAPI(API_KEY)
+analyzer = PatternAnalyzer()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/api/palinsesto')
+def get_palinsesto():
+    competition = request.args.get('competition', 'SA')
+    days = int(request.args.get('days', 7))
     
-    def get_upcoming_matches(self, competition_code='SA', days_ahead=7):
-        date_to = (datetime.now() + timedelta(days=days_ahead)).strftime('%Y-%m-%d')
-        url = f"{self.base_url}/competitions/{competition_code}/matches"
-        params = {'status': 'SCHEDULED', 'dateTo': date_to}
-        response = requests.get(url, headers=self.headers, params=params, timeout=10)
-        response.raise_for_status()
-        return response.json()
+    try:
+        data = api_client.get_upcoming_matches(competition, days)
+        return jsonify({'success': True, 'data': data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
-class PatternAnalyzer:
-    @staticmethod
-    def find_draw_patterns(matches_data):
-        patterns = {'0-0': [], '1-1': [], '2-2': [], '3-3': []}
-        for match in matches_data.get('matches', []):
-            score = match.get('score', {}).get('fullTime', {})
-            home = score.get('home')
-            away = score.get('away')
-            if home is not None and away is not None and home == away:
-                pattern_key = f"{home}-{away}"
-                if pattern_key in patterns:
-                    patterns[pattern_key].append(match)
-        return patterns
+if __name__ == '__main__':
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
