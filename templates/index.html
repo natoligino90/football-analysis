@@ -1,18 +1,48 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Analisi Pre-Match</title>
-    <style>
-        body { font-family: Arial; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
-        h1 { text-align: center; color: #667eea; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>⚽ Football Analysis</h1>
-        <p>Applicazione in fase di sviluppo...</p>
-    </div>
-</body>
-</html>
+<div class="container">
+    <h1>⚽ Football Analysis</h1>
+    <label for="competition">Campionato (es. SA, PL, BL1, FL1):</label>
+    <input id="competition" type="text" value="SA">
+    <label for="days">Giorni:</label>
+    <input id="days" type="number" value="7">
+    <label for="prob">Probabilità minima (%):</label>
+    <input id="prob" type="number" value="30">
+    <button onclick="cerca()">Cerca</button>
+    <hr>
+    <table id="result" border="1" style="width:100%">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Campionato</th>
+                <th>Home</th>
+                <th>Away</th>
+                <th>Prob. pareggio (%)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script>
+function cerca() {
+    let c = document.getElementById('competition').value;
+    let d = document.getElementById('days').value;
+    let minprob = document.getElementById('prob').value;
+    fetch(`/api/probabilita_pareggio?competition=${c}&days=${d}`)
+        .then(r => r.json()).then(data => {
+            let rows = '';
+            if(data.success) {
+                data.data.forEach(m => {
+                    if(m.draw_probability >= minprob) {
+                        rows += `<tr>
+                            <td>${m.date.substring(0,10)}</td>
+                            <td>${m.competition}</td>
+                            <td>${m.home}</td>
+                            <td>${m.away}</td>
+                            <td>${m.draw_probability}</td>
+                        </tr>`;
+                    }
+                });
+            }
+            document.querySelector('#result tbody').innerHTML = rows;
+        });
+}
+</script>
