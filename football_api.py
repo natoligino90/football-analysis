@@ -6,15 +6,18 @@ class FootballDataAPI:
         self.base_url = "https://api.football-data.org/v4"
         self.headers = {'X-Auth-Token': api_key}
     
-    def get_upcoming_matches(self, competition_code='SA', days_ahead=7):
+    def get_upcoming_matches(self, competition_code='SA', days_ahead=7, limit=8):
         date_to = (datetime.now() + timedelta(days=days_ahead)).strftime('%Y-%m-%d')
         url = f"{self.base_url}/competitions/{competition_code}/matches"
         params = {'status': 'SCHEDULED', 'dateTo': date_to}
         response = requests.get(url, headers=self.headers, params=params, timeout=10)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        match_list = data.get('matches', [])[:limit]
+        data['matches'] = match_list
+        return data
     
-    def get_team_past_results(self, team_id, n=10):
+    def get_team_past_results(self, team_id, n=3):
         url = f"{self.base_url}/teams/{team_id}/matches"
         params = {'status': 'FINISHED', 'limit': n}
         response = requests.get(url, headers=self.headers, params=params, timeout=10)
@@ -28,9 +31,9 @@ class PatternAnalyzer:
         for match in matches_data.get('matches', []):
             home_id = match['homeTeam']['id']
             away_id = match['awayTeam']['id']
-            home_results = api_client.get_team_past_results(home_id, n=10)
-            away_results = api_client.get_team_past_results(away_id, n=10)
-            # calcola % di 1-1 (o X) per entrambe
+            home_results = api_client.get_team_past_results(home_id, n=3)
+            away_results = api_client.get_team_past_results(away_id, n=3)
+
             def calc_draw_percent(results):
                 draws = 0
                 total = 0
@@ -42,6 +45,7 @@ class PatternAnalyzer:
                         draws += 1
                     total += 1
                 return draws/total if total else 0
+
             home_draw = calc_draw_percent(home_results)
             away_draw = calc_draw_percent(away_results)
             prob = round(((home_draw + away_draw) / 2) * 100, 1)
