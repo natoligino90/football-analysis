@@ -163,8 +163,12 @@
                             </tr>`;
                         }
                     });
+                } else {
+                    rows = `<tr><td colspan="5" style="color:#e45050;">Errore: ${data.error}</td></tr>`;
                 }
                 document.querySelector('#result tbody').innerHTML = rows || '<tr><td colspan="5">Nessun match trovato!</td></tr>';
+            }).catch(() => {
+                document.querySelector('#result tbody').innerHTML = '<tr><td colspan="5">Errore di rete/API!</td></tr>';
             });
     }
     </script>
