@@ -1,176 +1,69 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Football Analysis</title>
-    <style>
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg, #5596ea 0%, #764ba2 100%);
-            margin: 0;
-        }
-        .container {
-            max-width: 900px;
-            margin: 50px auto;
-            background: rgba(255,255,255,0.96);
-            border-radius: 24px;
-            padding: 36px 32px 24px;
-            box-shadow: 0 8px 40px -8px #764ba228;
-        }
-        h1 {
-            text-align: center;
-            color: #4b67e2;
-            margin-top: 0;
-        }
-        label {
-            font-size: 1.05em;
-            color: #574ba2;
-            margin-right: 10px;
-        }
-        select, input[type="number"], input[type="range"] {
-            font-size: 1.1em;
-            border-radius: 16px;
-            border: 1px solid #bbb;
-            background: #eef;
-            margin: 8px 10px 8px 0;
-            padding: 8px 14px;
-            transition: border-color 0.2s;
-        }
-        select:focus, input[type="number"]:focus {
-            border-color: #667eea;
-            outline: none;
-        }
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-        input[type="range"] {
-            width: 120px;
-        }
-        .range-label {
-            display: inline-block;
-            min-width: 48px;
-            color: #4b67e2;
-        }
-        button {
-            font-size: 1.1em;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            color: #fff;
-            border: none;
-            border-radius: 18px;
-            padding: 10px 26px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 8px;
-            box-shadow: 0 2px 12px -4px #764ba228;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background: linear-gradient(90deg, #564bad, #4768ea);
-        }
-        table {
-            width: 100%;
-            margin-top: 18px;
-            border-collapse: separate;
-            border-spacing: 0;
-            box-shadow: 0 6px 30px -14px #764ba228;
-        }
-        th, td {
-            padding: 10px 8px;
-            text-align: center;
-            border-bottom: 1.5px solid #d0d9ee;
-        }
-        th {
-            background: #667eea;
-            color: #fff;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-        }
-        tr:nth-child(even) td {
-            background: #f2f6ff;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        .prob-cell {
-            font-weight: bold;
-            color: #4768ea;
-            background: #e9edfc;
-            border-radius: 12px;
-        }
-    </style>
+<meta charset="UTF-8" />
+<title>Football Analysis Doppia API</title>
 </head>
 <body>
-    <div class="container">
-        <h1>⚽ Football Analysis</h1>
-        <div class="filters">
-            <label for="competition">Campionato:</label>
-            <select id="competition">
-                <option value="SA">Serie A</option>
-                <option value="PL">Premier League</option>
-                <option value="BL1">Bundesliga</option>
-                <option value="FL1">Ligue 1</option>
-                <option value="PD">La Liga</option>
-                <option value="ELC">Championship</option>
-            </select>
-            <label for="days">Giorni:</label>
-            <select id="days">
-                <option value="1">Oggi</option>
-                <option value="2">2 giorni</option>
-                <option value="3">3 giorni</option>
-                <option value="7">Settimana</option>
-                <option value="14">2 settimane</option>
-            </select>
-            <label for="prob">Probabilità minima:</label>
-            <span class="range-label" id="lblprob">30%</span>
-            <input id="prob" type="range" min="10" max="90" step="1" value="30" oninput="document.getElementById('lblprob').textContent = this.value + '%'">
-            <button onclick="cerca()">Cerca</button>
-        </div>
-        <table id="result">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Campionato</th>
-                    <th>Home</th>
-                    <th>Away</th>
-                    <th>Prob. pareggio (%)</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    <script>
-    function cerca() {
-        let c = document.getElementById('competition').value;
-        let d = document.getElementById('days').value;
-        let minprob = document.getElementById('prob').value;
-        fetch(`/api/probabilita_pareggio?competition=${c}&days=${d}`)
-            .then(r => r.json()).then(data => {
-                let rows = '';
-                if(data.success) {
-                    data.data.forEach(m => {
-                        if(m.draw_probability >= minprob) {
-                            rows += `<tr>
-                                <td>${m.date.substring(0,10)}</td>
-                                <td>${m.competition}</td>
-                                <td>${m.home}</td>
-                                <td>${m.away}</td>
-                                <td class="prob-cell">${m.draw_probability}</td>
-                            </tr>`;
-                        }
-                    });
-                } else {
-                    rows = `<tr><td colspan="5" style="color:#e45050;">Errore: ${data.error}</td></tr>`;
-                }
-                document.querySelector('#result tbody').innerHTML = rows || '<tr><td colspan="5">Nessun match trovato!</td></tr>';
-            }).catch(() => {
-                document.querySelector('#result tbody').innerHTML = '<tr><td colspan="5">Errore di rete/API!</td></tr>';
-            });
-    }
-    </script>
+    <label for="competition">Campionato:</label>
+    <select id="competition">
+        <option value="135">Serie A</option>
+        <option value="39">Premier League</option>
+        <option value="78">Bundesliga</option>
+    </select>
+    <input id="giorno" type="date" value="2025-10-21" />
+
+    <button onclick="cercaFootballData()">Cerca Football-Data</button>
+    <button onclick="cercaAPISports()">Cerca API-Football</button>
+
+    <h3>Dati Football-Data.org</h3>
+    <table id="result" border="1" cellspacing="0" cellpadding="6"><tbody></tbody></table>
+
+    <h3>Dati API-Football Sports</h3>
+    <table id="apisports" border="1" cellspacing="0" cellpadding="6"><tbody></tbody></table>
+
+<script>
+function cercaFootballData() {
+    let comp = document.getElementById('competition').value;
+    let days = 7; // o altro parametro se vuoi
+    fetch(`/api/palinsesto?competition=${comp}&days=${days}`)
+        .then(res => res.json())
+        .then(data => {
+            let rows = '';
+            if(data.success) {
+                data.data.matches.forEach(m => {
+                    rows += `<tr><td>${m.utcDate.substring(0,10)}</td>
+                        <td>${m.competition.name}</td>
+                        <td>${m.homeTeam.name}</td>
+                        <td>${m.awayTeam.name}</td>
+                    </tr>`;
+                });
+            }
+            else rows = `<tr><td colspan="4">${data.error}</td></tr>`;
+            document.querySelector('#result tbody').innerHTML = rows;
+        });
+}
+
+function cercaAPISports() {
+    let league_id = document.getElementById('competition').value;
+    let date = document.getElementById('giorno').value;
+    fetch(`/api/fixtures_apisports?league_id=${league_id}&date=${date}`)
+        .then(res => res.json())
+        .then(data => {
+            let rows = '';
+            if(data.success) {
+                data.data.response.forEach(f => {
+                    rows += `<tr><td>${f.fixture.date.substring(0,10)}</td>
+                        <td>${f.teams.home.name}</td>
+                        <td>${f.teams.away.name}</td>
+                        <td>${f.fixture.status.short}</td>
+                    </tr>`;
+                });
+            }
+            else rows = `<tr><td colspan="4">${data.error}</td></tr>`;
+            document.querySelector('#apisports tbody').innerHTML = rows;
+        });
+}
+</script>
 </body>
 </html>
