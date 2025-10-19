@@ -40,3 +40,27 @@ def probabilita_pareggio():
         for item in prob_list:
             m = item['match']
             out.append({
+                'date': m['utcDate'],
+                'competition': m['competition']['name'] if 'competition' in m else '',
+                'home': m['homeTeam']['name'],
+                'away': m['awayTeam']['name'],
+                'draw_probability': item['draw_probability']
+            })  # <-- questa parentesi era mancante!
+        return jsonify({'success': True, 'data': out})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# --- NUOVA ROUTE PER API-FOOTBALL SPORTS ---
+@app.route('/api/fixtures_apisports')
+def fixtures_apisports():
+    league_id = request.args.get('league_id', '135')  # 135 Serie A
+    date = request.args.get('date', '')
+    try:
+        data = api_sports_client.get_fixtures(league_id, date)
+        return jsonify({'success': True, 'data': data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+if __name__ == '__main__':
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
