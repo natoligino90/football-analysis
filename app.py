@@ -1,13 +1,19 @@
 from flask import Flask, jsonify, render_template, request
 from football_api import FootballDataAPI, PatternAnalyzer
+from football_api_apisports import APIFootballAPIClient
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 
-API_KEY = '9459832e421b4e4e93730bdf969514ff'
+# Prima API: Football-Data.org
+API_KEY = os.getenv('FOOTBALL_DATA_API_KEY') or '9459832e421b4e4e93730bdf969514ff'
 api_client = FootballDataAPI(API_KEY)
 analyzer = PatternAnalyzer()
+
+# Seconda API: API-Football (api-sports)
+API_KEY_APISPORTS = os.getenv('API_FOOTBALL_KEY') or '8a07306b432145e4d1465338c94a0539'
+api_sports_client = APIFootballAPIClient(API_KEY_APISPORTS)
 
 @app.route('/')
 def index():
@@ -34,16 +40,3 @@ def probabilita_pareggio():
         for item in prob_list:
             m = item['match']
             out.append({
-                'date': m['utcDate'],
-                'competition': m['competition']['name'] if 'competition' in m else '',
-                'home': m['homeTeam']['name'],
-                'away': m['awayTeam']['name'],
-                'draw_probability': item['draw_probability']
-            })
-        return jsonify({'success': True, 'data': out})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
